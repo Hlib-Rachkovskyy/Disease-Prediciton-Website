@@ -1,10 +1,12 @@
 
-Datagrip connection to db:
-        driver = Microsoft Sql Server,
-        host = localhost,
-        user = sa,
-        password = yourStrong(!)Password
+In Datagrip, the connection to the database is configured as follows:
 
-DB used in is mssql, flask needs installed odbc 18
+Driver: Microsoft SQL Server
+Host: localhost
+User: sa
+Password: yourStrong(!)Password
+The database used is MSSQL, and Flask requires ODBC 18 to be installed.
 
-seed_data.py have code which add to db admin and test user
+The seed_data.py script contains code that adds an admin and a test user to the database.
+
+
