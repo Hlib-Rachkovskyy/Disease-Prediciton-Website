@@ -104,8 +104,6 @@ def create_user(name, password, workplace):
     return new_user.Id
 
 
- # idk
-
 
 """Approved by"""
 

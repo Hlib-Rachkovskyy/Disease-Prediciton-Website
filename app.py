@@ -1,4 +1,3 @@
-import json
 
 from flask import Flask, jsonify, request, make_response, render_template, redirect, url_for, session
 from flask_jwt_extended.exceptions import NoAuthorizationError
@@ -205,11 +204,7 @@ class Specify(Resource):
 api.add_resource(Specify, '/api/disease/specify/<int:disease_id>/<string:correct_name>')
 
 
-# On the terminal type: curl http://127.0.0.1:5000/
-
-# WEB
-
-
+#WEB
 
 @app.route('/')
 def home():
