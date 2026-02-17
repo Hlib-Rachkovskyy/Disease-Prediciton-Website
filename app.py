@@ -57,7 +57,7 @@ class GuestRegister(Resource):
         if find_invites_in_base(data['invite']):
             id_of_created_user = create_user(data['username'], hash_password(data['password']), data['workplace'])
             return make_response(
-                jsonify({f'User on id ${id_of_created_user} created successfully': id_of_created_user}), 201)
+                jsonify({f"User on id ${id_of_created_user} created successfully": id_of_created_user}), 201)
         else:
             return make_response(jsonify({'Wrong invite data': data['invite']}), 401)
 
@@ -79,8 +79,7 @@ class GuestLogin(Resource):
             response.set_cookie('access_token_cookie', access_token, httponly=True, secure=True)
             return response
         else:
-            return make_response(jsonify({'error': f'Invalid username or password {hash_password(data['password'])}'}),
-                                 401)
+            return make_response(jsonify({'error': f"Invalid username or password {hash_password(data['password'])}"}),401)
 
 
 api.add_resource(GuestLogin, '/api/login')
@@ -94,7 +93,7 @@ def data_modification(parser):
     data = parser.parse_args()
 
     for i in range(data['amount']):
-        parser.add_argument(f'{i}', type=str, required=True, help="Symptom cannot be blank")
+        parser.add_argument(f"{i}", type=str, required=True, help="Symptom cannot be blank")
 
     data = parser.parse_args()
     data.pop('amount', None)
