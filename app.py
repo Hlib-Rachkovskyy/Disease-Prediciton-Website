@@ -10,6 +10,8 @@ bcrypt = Bcrypt()
 
 from flask_restful import Api, Resource, reqparse
 
+from flask_cors import CORS
+
 import ai_model
 from db_communication import create_user, get_disease_by_id, approve_disease_db, get_user_from_database, \
     db, delete_disease, create_invites, modify_disease_name, find_invites_in_base, \
@@ -18,7 +20,12 @@ from db_communication import create_user, get_disease_by_id, approve_disease_db,
 app = Flask(__name__)
 api = Api(app)
 app.config.from_object('config.Config')
+CORS(app, supports_credentials=True)
+app.config["PROPAGATE_EXCEPTIONS"] = True
+app.config["JWT_HEADER_NAME"] = "Authorization"
+app.config["JWT_HEADER_TYPE"] = "Bearer"
 
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 bcrypt = Bcrypt(app)
 
 jwtManager = JWTManager(app)
@@ -38,6 +45,24 @@ except:
 
 def hash_password(password):
     return bcrypt.generate_password_hash(password).decode('utf-8')
+
+
+@jwtManager.expired_token_loader
+def my_expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({
+        'status': 401,
+        'sub_status': 'token_expired',
+        'msg': 'The token has expired'
+    }), 401
+
+
+@jwtManager.invalid_token_loader
+def my_invalid_token_callback(error):
+    return jsonify({
+        'status': 401,
+        'sub_status': 'token_invalid',
+        'msg': 'Signature verification failed'
+    }), 401
 
 
 """Guest"""
@@ -78,9 +103,10 @@ class GuestLogin(Resource):
         user = get_user_from_database(data['username'])
         if user and check_password_hash(user.Password, data['password']):
             access_token = create_access_token(identity=data['username'])
-            response = make_response(jsonify({'access_token is saved in cookies:': access_token}), 200)
-            response.set_cookie('access_token_cookie', access_token, httponly=True, secure=True)
-            return response
+            return make_response(jsonify({
+                'access_token': access_token,
+                'username': data['username']
+            }), 200)
         else:
             return make_response(jsonify({'error': f"Invalid username or password {hash_password(data['password'])}"}),
                                  401)
@@ -115,12 +141,16 @@ class DiseasePredict(Resource):
     def post(self):
         current_user = get_jwt_identity()
         parser = reqparse.RequestParser()
+
         data = ai.model_predict(data_modification(parser))
 
-        parser.add_argument('description', type=str, required=False, help="")
-        description = parser.parse_args()
-        create_disease_in_db(data[0], current_user, description['description'])
-        return make_response(jsonify({'message': 'Disease was added to database', 'Current user: ': current_user}), 201)
+        parser.add_argument('description', type=str, required=False)
+        args = parser.parse_args()
+
+        description_text = args.get('description') or f"Auto-generated for {data[0]}"
+
+        result = create_disease_in_db(data[0], current_user, description_text)
+        return make_response(jsonify({'message': result, 'Current user': current_user}), 201)
 
     @jwt_required()
     def delete(self, disease_id):
@@ -210,9 +240,6 @@ api.add_resource(Specify, '/api/disease/specify/<int:disease_id>/<string:correct
 
 #WEB
 
-@app.route('/')
-def home():
-    return render_template('index.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -224,12 +251,12 @@ def login():
         print(hash_password(password))
         if user and check_password_hash(user.Password, password):
             access_token = create_access_token(identity=username)
-            response = redirect(url_for('home'))
-            response.set_cookie('access_token_cookie', access_token, httponly=True, secure=True)
-            return response
+            return make_response(jsonify({
+                'access_token': access_token,
+                'username': user.Name
+            }), 200)
         else:
             return jsonify({'error': 'Invalid username or password'}), 401
-    return render_template('login.html')
 
 
 @app.route('/logout')
@@ -259,7 +286,6 @@ def register():
         else:
             return make_response(jsonify({'Wrong invite data': invite}), 401)
 
-    return render_template('register.html')
 
 
 @app.route('/predict', methods=['GET', 'POST'])
@@ -283,14 +309,12 @@ def predict():
     else:
         if not user:
             return redirect(url_for('login'))
-        return render_template('predict.html')
 
 
 @app.route('/predict_result', methods=['GET'])
 def predict_result():
     message = request.args.get('message')
     data = session.get('result_data', {})
-    return render_template('predict_result.html', message=message, data=data)
 
 
 @app.route('/unaproved', methods=['GET'])
@@ -299,7 +323,6 @@ def list_unapproved():
     current_user = get_jwt_identity()
     user = get_user_from_database(current_user)
     diseases = get_diseases_of_user_not_approved(user)
-    return render_template('list_of_unapproved_disease.html', diseases=diseases)
 
 
 @app.route('/approve/<int:disease_id>', methods=['GET', 'POST'])
@@ -322,7 +345,6 @@ def approve_disease(disease_id):
         else:
             return "Error approving disease", 405
 
-    return render_template('approve.html', disease=disease)
 
 
 if __name__ == '__main__':

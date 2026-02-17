@@ -4,3 +4,9 @@ setup.txt
 .idea
 trained_knn_model.pkl
 .env
+
+# Frontend
+node_modules
+dist
+dist-ssr
+*.local

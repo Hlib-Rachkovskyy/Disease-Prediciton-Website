@@ -78,7 +78,7 @@ def create_disease_in_db(Name, Username, Description):
     new_disease = Disease(Name=Name, Description=Description, User_Id=get_user_from_database(Username).Id)
     db.session.add(new_disease)
     db.session.commit()
-    return new_disease.Id
+    return new_disease.Name
 
 
 """User"""

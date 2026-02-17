@@ -10,6 +10,7 @@ def seed_data():
 
         db.session.bulk_save_objects(users)
         db.session.commit()
+        print('Seeding data')
 
 
 if __name__ == '__main__':
