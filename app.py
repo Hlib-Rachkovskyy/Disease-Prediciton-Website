@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify, request, make_response, render_template, redirect, url_for, session
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_migrate import Migrate
@@ -16,7 +15,6 @@ from db_communication import create_user, get_disease_by_id, approve_disease_db,
     db, delete_disease, create_invites, modify_disease_name, find_invites_in_base, \
     create_disease_in_db, get_invites, get_diseases_of_user_not_approved
 
-
 app = Flask(__name__)
 api = Api(app)
 app.config.from_object('config.Config')
@@ -27,15 +25,16 @@ jwtManager = JWTManager(app)
 
 db.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
 migrate = Migrate(app, db)
 
-ai = ai_model.AI()
-
+ai = ai_model.AI(dataset='Final_Augmented_dataset_Diseases_and_Symptoms.csv')
 
 
 def hash_password(password):
     return bcrypt.generate_password_hash(password).decode('utf-8')
-
 
 
 """Guest"""
@@ -128,7 +127,8 @@ class DiseasePredict(Resource):
 
                 return make_response(jsonify({'Disease on this id was removed': disease_id}), 204)
             else:
-                return make_response(jsonify({'Disease on this id wasn\'t found or was deleted already': disease_id}), 404)
+                return make_response(jsonify({'Disease on this id wasn\'t found or was deleted already': disease_id}),
+                                     404)
         else:
             return make_response(jsonify({'You don\'t have enough right\'s to delete a disease': disease_id}), 403)
 
@@ -189,7 +189,8 @@ class Specify(Resource):
             return make_response(jsonify({'disease wasn\'t found': disease_id}), 404)
 
         if not approve_disease_db(disease, user):
-            return make_response(jsonify({'you don\'t have enough rights to approve that disease report or that report was approved by someone else': disease_id}),
+            return make_response(jsonify({
+                                             'you don\'t have enough rights to approve that disease report or that report was approved by someone else': disease_id}),
                                  403)
 
         if correct_name == disease.Name:
@@ -288,6 +289,7 @@ def predict_result():
     data = session.get('result_data', {})
     return render_template('predict_result.html', message=message, data=data)
 
+
 @app.route('/unaproved', methods=['GET'])
 @jwt_required()
 def list_unapproved():
@@ -295,6 +297,7 @@ def list_unapproved():
     user = get_user_from_database(current_user)
     diseases = get_diseases_of_user_not_approved(user)
     return render_template('list_of_unapproved_disease.html', diseases=diseases)
+
 
 @app.route('/approve/<int:disease_id>', methods=['GET', 'POST'])
 @jwt_required()

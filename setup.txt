@@ -8,6 +8,8 @@
 2.
     Database mssql, ale flask potrzebuje odbc 18:
         https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
+3.
+pip install requirements.txt
 4.
     po polaczeniu z baza
         terminal

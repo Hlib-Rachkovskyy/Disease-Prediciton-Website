@@ -3,8 +3,9 @@ import os
 import pickle
 from sklearn.neighbors import KNeighborsClassifier
 
+
 class AI:
-    def __init__(self):
+    def __init__(self, dataset):
         self.model = None
         self.symptoms = None
         self.diseases = None
@@ -17,12 +18,15 @@ class AI:
             self.load_model()
         else:
             print("Training model...")
-            self.learn()
-            self.evaluate()
-            self.save_model()
+            if dataset:
+                self.learn(dataset)
+                self.evaluate()
+                self.save_model()
+            else:
+                print("No dataset found!")
 
-    def learn(self):
-        file_path = 'Final_Augmented_dataset_Diseases_and_Symptoms.csv'
+    def learn(self, dataset):
+        file_path = dataset
         data = pd.read_csv(file_path, encoding='utf-8')
 
         data = data.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -67,7 +71,6 @@ class AI:
         accuracy = (y_pred == y_true).mean()
 
         return accuracy
-
 
     def save_model(self):
         model_data = {
