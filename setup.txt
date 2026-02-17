@@ -1,5 +1,5 @@
 1.
-    Docker => https://www.youtube.com/watch?v=fFpDf5si_Hw&ab_channel=ScriptBytes
+    Docker =>
     Polaczenie przez datagrip:
         driver = Microsoft Sql Server,
         host = localhost,
@@ -8,12 +8,6 @@
 2.
     Database mssql, ale flask potrzebuje odbc 18:
         https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
-3.
-    terminal:
-        pip install Flask
-        pip install Flask-Migrate
-        pip install Flask-JWT-Extended
-        pip install flask-sqlalchemy
 4.
     po polaczeniu z baza
         terminal
