@@ -30,7 +30,10 @@ with app.app_context():
 
 migrate = Migrate(app, db)
 
-ai = ai_model.AI(dataset='Final_Augmented_dataset_Diseases_and_Symptoms.csv')
+try:
+    ai = ai_model.AI(dataset='Final_Augmented_dataset_Diseases_and_Symptoms.csv')
+except:
+    print("AI was not initialized")
 
 
 def hash_password(password):
@@ -79,7 +82,8 @@ class GuestLogin(Resource):
             response.set_cookie('access_token_cookie', access_token, httponly=True, secure=True)
             return response
         else:
-            return make_response(jsonify({'error': f"Invalid username or password {hash_password(data['password'])}"}),401)
+            return make_response(jsonify({'error': f"Invalid username or password {hash_password(data['password'])}"}),
+                                 401)
 
 
 api.add_resource(GuestLogin, '/api/login')
@@ -189,8 +193,8 @@ class Specify(Resource):
 
         if not approve_disease_db(disease, user):
             return make_response(jsonify({
-                                             'you don\'t have enough rights to approve that disease report or that report was approved by someone else': disease_id}),
-                                 403)
+                'you don\'t have enough rights to approve that disease report or that report was approved by someone else': disease_id}),
+                403)
 
         if correct_name == disease.Name:
             return make_response(jsonify({'disease was approved': disease_id}), 200)
