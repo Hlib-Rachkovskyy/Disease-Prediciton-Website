@@ -3,3 +3,4 @@ setup.txt
 *.pkl
 .idea
 trained_knn_model.pkl
+.env
