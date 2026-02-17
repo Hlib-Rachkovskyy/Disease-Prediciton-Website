@@ -13,9 +13,10 @@ const Login = ({ setToken }) => {
             const response = await api.post('/login', formData);
 
             const token = Object.values(response.data)[0];
+            localStorage.setItem('username', response.data.username);
             localStorage.setItem('token', token);
 
-            setToken(token, response.data.username);
+            setToken(token);
             navigate('/predict');
         } catch (err) {
             setError('Invalid username or password');
