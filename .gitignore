@@ -3,7 +3,7 @@ setup.txt
 .idea
 trained_knn_model.pkl
 .env
-
+__pycache__
 # Frontend
 node_modules
 dist
