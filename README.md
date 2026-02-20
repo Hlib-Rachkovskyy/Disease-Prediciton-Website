@@ -7,7 +7,7 @@ Welcome to the project! This guide will walk you through setting up the required
 ### 1. Dataset
 Before running the backend, you must download the AI model's training data.
 * **Download here:** [Diseases and Symptoms Dataset on Kaggle](https://www.kaggle.com/datasets/dhivyeshrk/diseases-and-symptoms-dataset)
-* Extract the `.csv` file and place it in the root of your **backend** directory. Ensure the filename matches what is expected in `app.py` (e.g., `Final\_Augmented\_dataset\_Diseases\_and\_Symptoms.csv`).
+* Extract the `.csv` file and place it in the root of your **backend** directory. Ensure the filename matches what is expected in `app.py` (e.g., `Final_Augmented_dataset_Diseases_and_Symptoms.csv`).
 
 ### 2. Database
 This project requires **PostgreSQL**. You need to have a Postgres server running and accepting connections.
