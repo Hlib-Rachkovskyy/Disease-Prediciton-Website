@@ -22,7 +22,7 @@ You need to create two separate `.env` files to configure the application locall
 Create a file named `.env` inside your **backend** directory:
 ```env
 # PostgreSQL connection string
-DATABASE_URL=postgresql://postgres:mysecretpassword@localhost:5431/postgres
+DATABASE_URL=postgresql://postgres:yoursecretpassword@localhost:5431/postgres
 
 # JWT Secret Key for authentication
 SECRET_KEY=your-super-secret-key
