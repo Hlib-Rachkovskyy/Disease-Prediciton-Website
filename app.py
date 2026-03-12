@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, jsonify, request, make_response, render_template, redirect, url_for, session
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_migrate import Migrate
@@ -348,4 +350,5 @@ def approve_disease(disease_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)

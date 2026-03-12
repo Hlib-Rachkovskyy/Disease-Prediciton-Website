@@ -3,6 +3,7 @@ setup.txt
 .idea
 .env
 __pycache__
+*.pkl
 # Frontend
 node_modules
 dist
