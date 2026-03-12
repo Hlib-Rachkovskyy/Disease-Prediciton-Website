@@ -243,109 +243,109 @@ api.add_resource(Specify, '/api/disease/specify/<int:disease_id>/<string:correct
 #WEB
 
 
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = get_user_from_database(username)
-        print(hash_password(password))
-        if user and check_password_hash(user.Password, password):
-            access_token = create_access_token(identity=username)
-            return make_response(jsonify({
-                'access_token': access_token,
-                'username': user.Name
-            }), 200)
-        else:
-            return jsonify({'error': 'Invalid username or password'}), 401
-
-
-@app.route('/logout')
-@jwt_required()
-def logout():
-    response = redirect(url_for('home'))
-    response.status_code = 204
-    unset_jwt_cookies(response)
-
-    return response
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        workplace = request.form['workplace']
-        invite = request.form['invite']
-        user = get_user_from_database(username)
-
-        if user:
-            return make_response(jsonify({'error': 'Name already used'}), 400)
-        if find_invites_in_base(invite):
-            create_user(username, hash_password(password), workplace)
-            return redirect(url_for('login'))
-        else:
-            return make_response(jsonify({'Wrong invite data': invite}), 401)
-
-
-
-@app.route('/predict', methods=['GET', 'POST'])
-def predict():
-    user = None
-    try:
-        verify_jwt_in_request(optional=True)
-        user = get_jwt_identity()
-    except NoAuthorizationError:
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        data = request.json
-        result_data = ai.model_predict(data)
-        session['result_data'] = result_data
-        message = 'Token is valid'
-        create_disease_in_db(Name=result_data[0], Username=user, Description=' '.join(result_data))
-
-        return redirect(url_for('predict_result', message=message))
-
-    else:
-        if not user:
-            return redirect(url_for('login'))
-
-
-@app.route('/predict_result', methods=['GET'])
-def predict_result():
-    message = request.args.get('message')
-    data = session.get('result_data', {})
-
-
-@app.route('/unaproved', methods=['GET'])
-@jwt_required()
-def list_unapproved():
-    current_user = get_jwt_identity()
-    user = get_user_from_database(current_user)
-    diseases = get_diseases_of_user_not_approved(user)
-
-
-@app.route('/approve/<int:disease_id>', methods=['GET', 'POST'])
-@jwt_required()
-def approve_disease(disease_id):
-    current_user = get_jwt_identity()
-    user = get_user_from_database(current_user)
-    if not user:
-        return redirect(url_for('login'))
-
-    disease = get_disease_by_id(disease_id)
-    if not disease:
-        return redirect(url_for('list_unapproved'))
-
-    if request.method == 'POST':
-        correct_name = request.form['name']
-        disease.Name = correct_name
-        if approve_disease_db(disease, user):
-            return redirect(url_for('list_unapproved'))
-        else:
-            return "Error approving disease", 405
+#
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         user = get_user_from_database(username)
+#         print(hash_password(password))
+#         if user and check_password_hash(user.Password, password):
+#             access_token = create_access_token(identity=username)
+#             return make_response(jsonify({
+#                 'access_token': access_token,
+#                 'username': user.Name
+#             }), 200)
+#         else:
+#             return jsonify({'error': 'Invalid username or password'}), 401
+#
+#
+# @app.route('/logout')
+# @jwt_required()
+# def logout():
+#     response = redirect(url_for('home'))
+#     response.status_code = 204
+#     unset_jwt_cookies(response)
+#
+#     return response
+#
+#
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         workplace = request.form['workplace']
+#         invite = request.form['invite']
+#         user = get_user_from_database(username)
+#
+#         if user:
+#             return make_response(jsonify({'error': 'Name already used'}), 400)
+#         if find_invites_in_base(invite):
+#             create_user(username, hash_password(password), workplace)
+#             return redirect(url_for('login'))
+#         else:
+#             return make_response(jsonify({'Wrong invite data': invite}), 401)
+#
+#
+#
+# @app.route('/predict', methods=['GET', 'POST'])
+# def predict():
+#     user = None
+#     try:
+#         verify_jwt_in_request(optional=True)
+#         user = get_jwt_identity()
+#     except NoAuthorizationError:
+#         return redirect(url_for('login'))
+#
+#     if request.method == 'POST':
+#         data = request.json
+#         result_data = ai.model_predict(data)
+#         session['result_data'] = result_data
+#         message = 'Token is valid'
+#         create_disease_in_db(Name=result_data[0], Username=user, Description=' '.join(result_data))
+#
+#         return redirect(url_for('predict_result', message=message))
+#
+#     else:
+#         if not user:
+#             return redirect(url_for('login'))
+#
+#
+# @app.route('/predict_result', methods=['GET'])
+# def predict_result():
+#     message = request.args.get('message')
+#     data = session.get('result_data', {})
+#
+#
+# @app.route('/unaproved', methods=['GET'])
+# @jwt_required()
+# def list_unapproved():
+#     current_user = get_jwt_identity()
+#     user = get_user_from_database(current_user)
+#     diseases = get_diseases_of_user_not_approved(user)
+#
+#
+# @app.route('/approve/<int:disease_id>', methods=['GET', 'POST'])
+# @jwt_required()
+# def approve_disease(disease_id):
+#     current_user = get_jwt_identity()
+#     user = get_user_from_database(current_user)
+#     if not user:
+#         return redirect(url_for('login'))
+#
+#     disease = get_disease_by_id(disease_id)
+#     if not disease:
+#         return redirect(url_for('list_unapproved'))
+#
+#     if request.method == 'POST':
+#         correct_name = request.form['name']
+#         disease.Name = correct_name
+#         if approve_disease_db(disease, user):
+#             return redirect(url_for('list_unapproved'))
+#         else:
+#             return "Error approving disease", 405
 
 
 
