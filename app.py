@@ -39,6 +39,8 @@ with app.app_context():
 
 migrate = Migrate(app, db)
 
+ai = None
+
 try:
     ai = ai_model.AI(dataset='Final_Augmented_dataset_Diseases_and_Symptoms.csv')
 except:
@@ -134,13 +136,20 @@ def data_modification(parser):
 
 
 class DiseasePredict(Resource):
+
     def get(self):
+        if ai is None:
+            return make_response(jsonify({'error': 'AI model was not initialized on the server'}), 503)
+
         parser = reqparse.RequestParser()
         data = ai.model_predict(data_modification(parser))
         return make_response(jsonify({'message': 'Your connection is unlogged', 'data': data}), 200)
 
     @jwt_required()
     def post(self):
+        if ai is None:
+            return make_response(jsonify({'error': 'AI model was not initialized on the server'}), 503)
+
         current_user = get_jwt_identity()
         parser = reqparse.RequestParser()
 
@@ -238,7 +247,6 @@ class Specify(Resource):
 
 
 api.add_resource(Specify, '/api/disease/specify/<int:disease_id>/<string:correct_name>')
-
 
 #WEB
 
@@ -346,7 +354,6 @@ api.add_resource(Specify, '/api/disease/specify/<int:disease_id>/<string:correct
 #             return redirect(url_for('list_unapproved'))
 #         else:
 #             return "Error approving disease", 405
-
 
 
 if __name__ == '__main__':

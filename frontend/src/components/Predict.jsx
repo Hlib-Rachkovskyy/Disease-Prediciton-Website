@@ -115,11 +115,20 @@ const Predict = () => {
 
             const response = await api.post('/disease/predict', payload);
 
-            setResult(`Disease record created successfully! It's a ${response.data.message}`);
+            if (response?.data?.error) {
+                setResult(`It's a ${response.data.error}`);
+            } else {
+                setResult(`Disease record created successfully! It's a ${response.data.message}`);
+            }
 
         } catch (err) {
-            console.error(err);
-            setResult("Error processing prediction.");
+            if (err.response && err.response.data && err.response.data.error) {
+                setResult('Error ' + err.response.data.error);
+            }
+
+            else {
+                setResult(err.message || "An unexpected Error occurred");
+            }
         } finally {
             setLoading(false);
         }
